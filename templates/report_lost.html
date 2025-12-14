@@ -1,0 +1,144 @@
+{% extends "base.html" %} {% block title %}Report Lost Item - FindIt{% endblock
+%} {% block content %}
+<div class="card">
+  <h2>🔍 Report a Lost Item</h2>
+  <p>
+    Fill out the form below to report your lost item. The more details you
+    provide, the better chance we have of finding it.
+  </p>
+</div>
+
+<div class="card">
+  <form method="POST" enctype="multipart/form-data">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px">
+      <div class="form-group">
+        <label for="item_name">Item Name *</label>
+        <input
+          type="text"
+          id="item_name"
+          name="item_name"
+          required
+          placeholder="e.g., iPhone 12, Black Wallet"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="category">Category *</label>
+        <select id="category" name="category" required>
+          <option value="">Select a category</option>
+          <option value="Electronics">Electronics</option>
+          <option value="Clothing">Clothing</option>
+          <option value="Accessories">Accessories</option>
+          <option value="Books">Books</option>
+          <option value="Documents">Documents</option>
+          <option value="Keys">Keys</option>
+          <option value="Jewelry">Jewelry</option>
+          <option value="Bags">Bags</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea
+        id="description"
+        name="description"
+        placeholder="Provide a detailed description of your item including color, size, distinguishing marks, etc."
+      ></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="image">Item Image (Optional)</label>
+      <input
+        type="file"
+        id="image"
+        name="image"
+        accept="image/*"
+        style="padding: 8px"
+      />
+      <small
+        style="display: block; margin-top: 8px; color: var(--text-secondary)"
+      >
+        Upload a clear photo of your item. Supported formats: PNG, JPG, JPEG,
+        GIF
+      </small>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px">
+      <div class="form-group">
+        <label for="lost_date">Date Lost *</label>
+        <input type="date" id="lost_date" name="lost_date" required />
+      </div>
+
+      <div class="form-group">
+        <label for="location">Location Lost *</label>
+        <input
+          type="text"
+          id="location"
+          name="location"
+          required
+          placeholder="e.g., Library, Cafeteria, Room 203"
+        />
+      </div>
+    </div>
+
+    <h3>Contact Information</h3>
+
+    <div class="form-group">
+      <label for="contact_name">Your Name *</label>
+      <input
+        type="text"
+        id="contact_name"
+        name="contact_name"
+        required
+        placeholder="John Doe"
+      />
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px">
+      <div class="form-group">
+        <label for="contact_email">Email Address</label>
+        <input
+          type="email"
+          id="contact_email"
+          name="contact_email"
+          placeholder="john@example.com"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="contact_phone">Phone Number</label>
+        <input
+          type="tel"
+          id="contact_phone"
+          name="contact_phone"
+          placeholder="555-1234"
+        />
+      </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 30px">
+      <button
+        type="submit"
+        class="btn btn-warning"
+        style="font-size: 1.1em; padding: 12px 30px"
+      >
+        🔍 Report Lost Item
+      </button>
+      <a href="{{ url_for('index') }}" class="btn" style="margin-left: 10px"
+        >Cancel</a
+      >
+    </div>
+  </form>
+</div>
+
+<div style="text-align: center; margin-top: 20px">
+  <a href="{{ url_for('index') }}" class="btn">← Back to Home</a>
+</div>
+
+<script>
+  // Set default date to today
+  document.getElementById("lost_date").valueAsDate = new Date();
+</script>
+{% endblock %}

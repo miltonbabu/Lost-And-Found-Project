@@ -1,0 +1,147 @@
+{% extends "base.html" %} {% block title %}Report Found Item - FindIt{% endblock
+%} {% block content %}
+<div class="card">
+  <h2>📦 Report a Found Item</h2>
+  <p>
+    Thank you for being honest! Fill out the form below to report an item you
+    found. This will help the owner locate their property.
+  </p>
+</div>
+
+<div class="card">
+  <form method="POST" enctype="multipart/form-data">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px">
+      <div class="form-group">
+        <label for="item_name">Item Name *</label>
+        <input
+          type="text"
+          id="item_name"
+          name="item_name"
+          required
+          placeholder="e.g., iPhone, Wallet, Umbrella"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="category">Category *</label>
+        <select id="category" name="category" required>
+          <option value="">Select a category</option>
+          <option value="Electronics">Electronics</option>
+          <option value="Clothing">Clothing</option>
+          <option value="Accessories">Accessories</option>
+          <option value="Books">Books</option>
+          <option value="Documents">Documents</option>
+          <option value="Keys">Keys</option>
+          <option value="Jewelry">Jewelry</option>
+          <option value="Bags">Bags</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea
+        id="description"
+        name="description"
+        placeholder="Provide a detailed description of the found item including color, size, condition, and any identifying features."
+      ></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="image">Item Image (Optional)</label>
+      <input
+        type="file"
+        id="image"
+        name="image"
+        accept="image/*"
+        style="padding: 8px"
+      />
+      <small
+        style="display: block; margin-top: 8px; color: var(--text-secondary)"
+      >
+        Upload a clear photo of the found item. Supported formats: PNG, JPG,
+        JPEG, GIF
+      </small>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px">
+      <div class="form-group">
+        <label for="found_date">Date Found *</label>
+        <input type="date" id="found_date" name="found_date" required />
+      </div>
+
+      <div class="form-group">
+        <label for="location">Location Found *</label>
+        <input
+          type="text"
+          id="location"
+          name="location"
+          required
+          placeholder="e.g., Library, Cafeteria, Parking Lot"
+        />
+      </div>
+    </div>
+
+    <h3>Your Contact Information</h3>
+    <p style="color: #666; font-style: italic">
+      This information will only be shared with the verified owner.
+    </p>
+
+    <div class="form-group">
+      <label for="contact_name">Your Name *</label>
+      <input
+        type="text"
+        id="contact_name"
+        name="contact_name"
+        required
+        placeholder="Jane Smith"
+      />
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px">
+      <div class="form-group">
+        <label for="contact_email">Email Address</label>
+        <input
+          type="email"
+          id="contact_email"
+          name="contact_email"
+          placeholder="jane@example.com"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="contact_phone">Phone Number</label>
+        <input
+          type="tel"
+          id="contact_phone"
+          name="contact_phone"
+          placeholder="555-5678"
+        />
+      </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 30px">
+      <button
+        type="submit"
+        class="btn btn-success"
+        style="font-size: 1.1em; padding: 12px 30px"
+      >
+        📦 Report Found Item
+      </button>
+      <a href="{{ url_for('index') }}" class="btn" style="margin-left: 10px"
+        >Cancel</a
+      >
+    </div>
+  </form>
+</div>
+
+<div style="text-align: center; margin-top: 20px">
+  <a href="{{ url_for('index') }}" class="btn">← Back to Home</a>
+</div>
+
+<script>
+  // Set default date to today
+  document.getElementById("found_date").valueAsDate = new Date();
+</script>
+{% endblock %}

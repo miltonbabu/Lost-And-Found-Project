@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - FindIt{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>🔧 Admin Dashboard</h2>
+    <p>Manage lost items, found items, and claims from this dashboard.</p>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px;">
+    <div class="stat-card">
+        <div class="stat-number">{{ lost_items|selectattr('status', 'equalto', 'unclaimed')|list|length }}</div>
+        <div class="stat-label">Unclaimed Lost Items</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">{{ found_items|selectattr('status', 'equalto', 'unclaimed')|list|length }}</div>
+        <div class="stat-label">Unclaimed Found Items</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">{{ claims|selectattr('status', 'equalto', 'pending')|list|length }}</div>
+        <div class="stat-label">Pending Claims</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">{{ (lost_items|length + found_items|length) }}</div>
+        <div class="stat-label">Total Items</div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+    <!-- Lost Items Section -->
+    <div>
+        <div class="card">
+            <h3>🔍 Lost Items</h3>
+            {% if lost_items %}
+                <div style="max-height: 400px; overflow-y: auto;">
+                    {% for item in lost_items %}
+                        <div class="item-card {% if item.status == 'claimed' %}status-claimed{% elif item.status == 'returned' %}status-returned{% endif %}" style="margin-bottom: 20px; display: grid; grid-template-columns: 80px 1fr; gap: 15px;">
+                            {% if item.image_filename %}
+                                <div style="overflow: hidden; border-radius: 6px; height: 80px;">
+                                    <img src="{{ url_for('uploaded_file', filename=item.image_filename) }}" 
+                                         style="width: 100%; height: 100%; object-fit: cover;" 
+                                         alt="{{ item.item_name }}">
+                                </div>
+                            {% else %}
+                                <div style="background-color: #f1f5f9; border-radius: 6px; height: 80px; display: flex; align-items: center; justify-content: center;">
+                                    <span style="font-size: 2rem;">📷</span>
+                                </div>
+                            {% endif %}
+                            <div>
+                                <div class="item-title">{{ item.item_name }}</div>
+                                <div class="item-meta">📁 {{ item.category }} - 📍 {{ item.location }}</div>
+                                <div class="item-meta">👤 Owner: {{ item.contact_name }}</div>
+                                <div class="item-meta">📅 Lost: {{ item.lost_date }}</div>
+                                <div class="item-meta">
+                                    <span class="status-badge status-{{ item.status }}">{{ item.status }}</span>
+                                </div>
+                           
+                            {% if item.claim_info %}
+                                <div style="margin-top: 10px; padding: 10px; background-color: #e8f5e8; border-radius: 5px; border-left: 4px solid #28a745;">
+                                    <div style="font-weight: bold; color: #155724; margin-bottom: 5px;">
+                                        🏆 Claimed by: {{ item.claim_info.claimant_name }}
+                                    </div>
+                                    {% if item.claim_info.claimant_email %}
+                                        <div style="color: #155724; font-size: 0.9em;">📧 {{ item.claim_info.claimant_email }}</div>
+                                    {% endif %}
+                                    {% if item.claim_info.claimant_phone %}
+                                        <div style="color: #155724; font-size: 0.9em;">📞 {{ item.claim_info.claimant_phone }}</div>
+                                    {% endif %}
+                                    {% if item.claim_info.claim_description %}
+                                        <div style="color: #155724; font-size: 0.9em; margin-top: 5px;">📝 {{ item.claim_info.claim_description[:50] }}{% if item.claim_info.claim_description|length > 50 %}...{% endif %}</div>
+                                    {% endif %}
+                                    <div style="color: #155724; font-size: 0.8em; margin-top: 5px;">📅 Claimed: {{ item.claim_info.created_at[:10] }}</div>
+                                </div>
+                            {% endif %}
+                           
+                            <div style="margin-top: 10px; display: flex; gap: 5px; flex-wrap: wrap;">
+                                <form method="POST" action="{{ url_for('update_status') }}" style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="hidden" name="item_type" value="lost">
+                                    <input type="hidden" name="item_id" value="{{ item.id }}">
+                                    <select name="status" style="padding: 5px; border-radius: 3px; border: 1px solid #ddd;">
+                                        <option value="unclaimed" {% if item.status == 'unclaimed' %}selected{% endif %}>Unclaimed</option>
+                                        <option value="claimed" {% if item.status == 'claimed' %}selected{% endif %}>Claimed</option>
+                                        <option value="returned" {% if item.status == 'returned' %}selected{% endif %}>Returned</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-sm">Update</button>
+                                </form>
+                                <a href="{{ url_for('edit_lost_item', item_id=item.id) }}" class="btn btn-sm btn-primary">✏️ Edit</a>
+                                <form method="POST" action="{{ url_for('delete_lost_item', item_id=item.id) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this item?');">
+                                    <button type="submit" class="btn btn-sm btn-danger">🗑️ Delete</button>
+                                </form>
+                            </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>No lost items reported.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Found Items Section -->
+    <div>
+        <div class="card">
+            <h3>📦 Found Items</h3>
+            {% if found_items %}
+                <div style="max-height: 400px; overflow-y: auto;">
+                    {% for item in found_items %}
+                        <div class="item-card {% if item.status == 'claimed' %}status-claimed{% elif item.status == 'returned' %}status-returned{% endif %}" style="margin-bottom: 20px; display: grid; grid-template-columns: 80px 1fr; gap: 15px;">
+                            {% if item.image_filename %}
+                                <div style="overflow: hidden; border-radius: 6px; height: 80px;">
+                                    <img src="{{ url_for('uploaded_file', filename=item.image_filename) }}" 
+                                         style="width: 100%; height: 100%; object-fit: cover;" 
+                                         alt="{{ item.item_name }}">
+                                </div>
+                            {% else %}
+                                <div style="background-color: #f1f5f9; border-radius: 6px; height: 80px; display: flex; align-items: center; justify-content: center;">
+                                    <span style="font-size: 2rem;">📷</span>
+                                </div>
+                            {% endif %}
+                            <div>
+                                <div class="item-title">{{ item.item_name }}</div>
+                                <div class="item-meta">📁 {{ item.category }} - 📍 {{ item.location }}</div>
+                                <div class="item-meta">🔍 Found by: {{ item.contact_name }}</div>
+                                <div class="item-meta">📅 Found: {{ item.found_date }}</div>
+                                <div class="item-meta">
+                                    <span class="status-badge status-{{ item.status }}">{{ item.status }}</span>
+                                </div>
+                           
+                            {% if item.claim_info %}
+                                <div style="margin-top: 10px; padding: 10px; background-color: #fff3cd; border-radius: 5px; border-left: 4px solid #ffc107;">
+                                    <div style="font-weight: bold; color: #856404; margin-bottom: 5px;">
+                                        🏆 Claimed by: {{ item.claim_info.claimant_name }}
+                                    </div>
+                                    {% if item.claim_info.claimant_email %}
+                                        <div style="color: #856404; font-size: 0.9em;">📧 {{ item.claim_info.claimant_email }}</div>
+                                    {% endif %}
+                                    {% if item.claim_info.claimant_phone %}
+                                        <div style="color: #856404; font-size: 0.9em;">📞 {{ item.claim_info.claimant_phone }}</div>
+                                    {% endif %}
+                                    {% if item.claim_info.claim_description %}
+                                        <div style="color: #856404; font-size: 0.9em; margin-top: 5px;">📝 {{ item.claim_info.claim_description[:50] }}{% if item.claim_info.claim_description|length > 50 %}...{% endif %}</div>
+                                    {% endif %}
+                                    <div style="color: #856404; font-size: 0.8em; margin-top: 5px;">📅 Claimed: {{ item.claim_info.created_at[:10] }}</div>
+                                </div>
+                            {% endif %}
+                           
+                            <div style="margin-top: 10px; display: flex; gap: 5px; flex-wrap: wrap;">
+                                <form method="POST" action="{{ url_for('update_status') }}" style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="hidden" name="item_type" value="found">
+                                    <input type="hidden" name="item_id" value="{{ item.id }}">
+                                    <select name="status" style="padding: 5px; border-radius: 3px; border: 1px solid #ddd;">
+                                        <option value="unclaimed" {% if item.status == 'unclaimed' %}selected{% endif %}>Unclaimed</option>
+                                        <option value="claimed" {% if item.status == 'claimed' %}selected{% endif %}>Claimed</option>
+                                        <option value="returned" {% if item.status == 'returned' %}selected{% endif %}>Returned</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-sm">Update</button>
+                                </form>
+                                <a href="{{ url_for('edit_found_item', item_id=item.id) }}" class="btn btn-sm btn-primary">✏️ Edit</a>
+                                <form method="POST" action="{{ url_for('delete_found_item', item_id=item.id) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this item?');">
+                                    <button type="submit" class="btn btn-sm btn-danger">🗑️ Delete</button>
+                                </form>
+                            </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>No found items reported.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Claims Section -->
+<div class="card" style="margin-top: 30px;">
+    <h3>🏆 Recent Claims</h3>
+    {% if claims %}
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                <thead>
+                    <tr style="background-color: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+                        <th style="padding: 12px; text-align: left;">Item Name</th>
+                        <th style="padding: 12px; text-align: left;">Type</th>
+                        <th style="padding: 12px; text-align: left;">Claimant</th>
+                        <th style="padding: 12px; text-align: left;">Original Contact</th>
+                        <th style="padding: 12px; text-align: left;">Contact</th>
+                        <th style="padding: 12px; text-align: left;">Status</th>
+                        <th style="padding: 12px; text-align: left;">Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for claim in claims %}
+                        <tr style="border-bottom: 1px solid #dee2e6;">
+                            <td style="padding: 12px; font-weight: bold;">{{ claim.item_name }}</td>
+                            <td style="padding: 12px;">
+                                <span class="status-badge" style="background-color: #6c757d;">{{ claim.item_type_desc }}</span>
+                            </td>
+                            <td style="padding: 12px;">{{ claim.claimant_name }}</td>
+                            <td style="padding: 12px; color: #666;">{{ claim.original_contact }}</td>
+                            <td style="padding: 12px; font-size: 0.9em;">
+                                {% if claim.claimant_email %}📧 {{ claim.claimant_email }}{% endif %}
+                                {% if claim.claimant_phone %}<br>📞 {{ claim.claimant_phone }}{% endif %}
+                            </td>
+                            <td style="padding: 12px;">
+                                <span class="status-badge status-{{ claim.status }}">{{ claim.status }}</span>
+                            </td>
+                            <td style="padding: 12px;">{{ claim.created_at[:10] }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p>No claims have been submitted yet.</p>
+    {% endif %}
+</div>
+
+<div style="text-align: center; margin-top: 30px;">
+    <a href="{{ url_for('index') }}" class="btn">← Back to Home</a>
+</div>
+{% endblock %}

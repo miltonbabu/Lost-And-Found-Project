@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>🔍 Similar {{ title.split(' ')[0] }} Items Found</h2>
+    <p>
+        We've found some similar unclaimed items that might match your reported {{ original_item_type }} item: <strong>{{ original_item_name }}</strong>
+    </p>
+    <p>These items match based on category, name similarity, location, and date proximity.</p>
+</div>
+
+{% if similar_items %}
+<div class="item-grid">
+    {% for match in similar_items %}
+    {% set item = match.item %}
+    <div class="item-card {% if item.status == 'claimed' %}status-claimed{% elif item.status == 'returned' %}status-returned{% else %}status-unclaimed{% endif %}">
+        {% if item.image_filename %}
+        <div style="margin-bottom: 15px; overflow: hidden; border-radius: 8px">
+            <img
+                src="{{ url_for('uploaded_file', filename=item.image_filename) }}"
+                style="width: 100%; height: 180px; object-fit: cover"
+                alt="{{ item.item_name }}"
+            />
+        </div>
+        {% endif %}
+        
+        <div class="item-title">{{ item.item_name }}</div>
+        
+        <div class="item-meta"><strong>Category:</strong> {{ item.category }}</div>
+        
+        <div class="item-meta">
+            <strong>{{ 'Found' if match.item_type == 'found' else 'Lost' }} Date:</strong> {{ item.found_date if match.item_type == 'found' else item.lost_date }}
+        </div>
+        
+        <div class="item-meta"><strong>Location:</strong> {{ item.location }}</div>
+        
+        <div class="item-meta"><strong>Contact:</strong> {{ item.contact_name }}</div>
+        
+        {% if item.description %}
+        <div class="item-description">
+            <strong>Description:</strong> {{ item.description }}
+        </div>
+        {% endif %}
+        
+        <!-- Similarity Score and Reasons -->
+        <div style="margin: 15px 0; padding: 12px; background-color: rgba(79, 70, 229, 0.1); border-radius: 8px; border-left: 4px solid var(--primary-color);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-weight: 600; color: var(--primary-color);">
+                    Similarity Score
+                </span>
+                <span style="background-color: var(--primary-color); color: white; padding: 4px 12px; border-radius: 16px; font-size: 0.85rem; font-weight: 600;">
+                    {{ match.score }}/100
+                </span>
+            </div>
+            <div style="font-size: 0.9rem; color: var(--text-secondary);">
+                <strong>Why this match:</strong>
+                <ul style="margin: 8px 0 0 20px; padding: 0;">
+                    {% for reason in match.reasons %}
+                    <li>{{ reason }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        
+        <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+            <!-- View Item Button -->
+            <a href="{{ url_for('view_found_item', item_id=item.id) if match.item_type == 'found' else url_for('view_lost_item', item_id=item.id) }}" class="btn">
+                👁️ View Details
+            </a>
+            
+            <!-- Claim Button if appropriate -->
+            {% if match.item_type == 'found' and original_item_type == 'lost' %}
+            <a href="{{ url_for('claim_found_item', item_id=item.id) }}" class="btn btn-success">
+                🏆 Claim This Item
+            </a>
+            {% elif match.item_type == 'lost' and original_item_type == 'found' %}
+            <a href="{{ url_for('claim_lost_item', item_id=item.id) }}" class="btn btn-success">
+                🏆 Mark as Claimed
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div style="margin-top: 30px; text-align: center;">
+    <a href="{{ url_for('list_lost') if original_item_type == 'lost' else url_for('list_found') }}" class="btn">
+        ← Back to {{ original_item_type|capitalize }} Items
+    </a>
+    <a href="{{ url_for('index') }}" class="btn btn-outline">
+        🏠 Home
+    </a>
+</div>
+{% else %}
+<div class="card">
+    <h3>No Similar Items Found</h3>
+    <p>We couldn't find any similar unclaimed items at this time.</p>
+    <div style="text-align: center; margin-top: 20px;">
+        <a href="{{ url_for('list_lost') if original_item_type == 'lost' else url_for('list_found') }}" class="btn">
+            ← Back to {{ original_item_type|capitalize }} Items
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

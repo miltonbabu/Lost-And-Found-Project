@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Claim Item - FindIt{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>🏆 Claim Item</h2>
+    <p>Please provide your information and details about why this item belongs to you.</p>
+</div>
+
+<div class="card">
+    <div class="item-card" style="margin-bottom: 20px;">
+        <div class="item-title">{{ item.item_name }}</div>
+        <div class="item-meta">
+            <strong>Category:</strong> {{ item.category }}
+        </div>
+        <div class="item-meta">
+            <strong>{% if item_type == 'lost' %}Lost{% else %}Found{% endif %} Date:</strong> 
+            {% if item_type == 'lost' %}{{ item.lost_date }}{% else %}{{ item.found_date }}{% endif %}
+        </div>
+        <div class="item-meta">
+            <strong>Location:</strong> {{ item.location }}
+        </div>
+        {% if item.description %}
+        <div class="item-description">
+            <strong>Description:</strong> {{ item.description }}
+        </div>
+        {% endif %}
+    </div>
+    
+    <form method="POST">
+        <div class="form-group">
+            <label for="claimant_name">Your Full Name *</label>
+            <input type="text" id="claimant_name" name="claimant_name" required 
+                   placeholder="Enter your full name">
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="form-group">
+                <label for="claimant_email">Email Address</label>
+                <input type="email" id="claimant_email" name="claimant_email" 
+                       placeholder="your.email@example.com">
+            </div>
+            
+            <div class="form-group">
+                <label for="claimant_phone">Phone Number</label>
+                <input type="tel" id="claimant_phone" name="claimant_phone" 
+                       placeholder="555-1234">
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="claim_description">Claim Details *</label>
+            <textarea id="claim_description" name="claim_description" required rows="5" 
+                      placeholder="Please provide detailed information about this item to prove ownership. Include:
+- Specific features or markings
+- When and where you lost/found it
+- Any other identifying information
+- Your relationship to the item"></textarea>
+        </div>
+        
+        <div class="card" style="background-color: #fff3cd; border-left: 4px solid #ffc107;">
+            <h4 style="margin-top: 0; color: #856404;">⚠️ Important Information</h4>
+            <ul style="color: #856404; margin: 0; padding-left: 20px;">
+                <li>You must provide accurate information about this item</li>
+                <li>False claims may result in disciplinary action</li>
+                <li>You will need to present identification when collecting the item</li>
+                <li>The {% if item_type == 'lost' %}owner{% else %}finder{% endif %} will be contacted to verify your claim</li>
+            </ul>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+            <button type="submit" class="btn btn-success" style="font-size: 1.1em; padding: 12px 30px;">
+                🏆 Submit Claim
+            </button>
+            <a href="{{ url_for('view_lost_item' if item_type == 'lost' else 'view_found_item', item_id=item.id) }}" class="btn" style="margin-left: 10px;">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<div style="text-align: center; margin-top: 20px;">
+    <a href="{{ url_for('list_lost' if item_type == 'lost' else 'list_found') }}" class="btn">← Back to {% if item_type == 'lost' %}Lost{% else %}Found{% endif %} Items</a>
+</div>
+{% endblock %}

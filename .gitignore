@@ -1,0 +1,53 @@
+# Virtual Environment
+.venv/
+env/
+venv/
+ENV/
+
+# Python Files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Database
+lost_and_found.db
+instance/
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# IDE Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Build Files
+build/
+dist/
+*.egg-info/
+
+# Test Files
+.coverage
+htmlcov/
+
+# Temporary Files
+*.tmp
+*.temp
+.cache/
+
+# Flask Debug Files
+*.pyc
+.flaskenv
